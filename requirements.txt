@@ -1,3 +1,4 @@
 pytest
 pycodestyle
 mypy
+scrapy
