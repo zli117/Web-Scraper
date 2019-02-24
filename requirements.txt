@@ -1,4 +1,4 @@
 pytest
 pycodestyle
 mypy
-scrapy
+beautifulsoup4
