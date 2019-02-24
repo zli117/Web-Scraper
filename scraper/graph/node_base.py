@@ -27,5 +27,5 @@ class NodeBase:
                 return True
         return False
 
-    def __eq__(self, other: 'NodeBase') -> bool:
-        return self.node_id == other.node_id
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, NodeBase) and self.node_id == other.node_id

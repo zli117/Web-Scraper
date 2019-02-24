@@ -20,6 +20,7 @@ class Graph:
         node.node_id = len(self.nodes)
         self.nodes.append(node)
         self.url_to_node[url] = node
+        return True
 
     def add_relationship(self, node_id_1: int, node_id_2: int) -> bool:
         if (0 <= node_id_1 < len(self.nodes)
