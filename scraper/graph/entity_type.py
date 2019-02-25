@@ -1,9 +1,6 @@
 from enum import Enum
 
 
-class EntityType(Enum):
+class EntityType(str, Enum):
     MOVIE = 1
     ACTOR = 2
-
-    def __str__(self):
-        return self.name

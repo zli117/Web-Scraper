@@ -50,7 +50,7 @@ class Graph:
         result = []
         for node in self._nodes:
             for attr, value in constraints.items():
-                if hasattr(node, attr) and getattr(node, attr) != value:
+                if not hasattr(node, attr) or getattr(node, attr) != value:
                     break
             else:
                 result.append(node)
@@ -58,7 +58,9 @@ class Graph:
 
     def serialize(self) -> str:
         serialized_nodes = list(map(lambda node: node.to_dict(), self._nodes))
+        # serialized_nodes = [node.to_dict() for node in self._nodes]
         serialized_edges = list(map(lambda edge: edge.to_dict(), self._edges))
+        # serialized_edges = [edge.to_dict() for edge in self._edges]
         return json.dumps(
             {'nodes': serialized_nodes, 'edges': serialized_edges})
 
@@ -70,7 +72,8 @@ class Graph:
         # Deserialize nodes
         for node_dict in serialized_nodes:
             cls_name = node_dict.pop('class_name')
-            cls = getattr(importlib.import_module('scraper.graph'), cls_name)
+            module_name = node_dict.pop('module_name')
+            cls = getattr(importlib.import_module(module_name), cls_name)
             node: NodeBase = cls()
             if not node.from_dict(node_dict):
                 return False
@@ -87,6 +90,6 @@ class Graph:
             edge = self.add_relationship(*ends)
             if edge is None:
                 return False
-            edge.weight = edge_dict.get('weight', default=0)
+            edge.weight = edge_dict.get('weight', 0)
 
         return True

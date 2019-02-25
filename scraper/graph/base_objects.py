@@ -16,7 +16,7 @@ class Edge:
 
     def to_dict(self) -> Dict[str, Any]:
         result = {'weight': self.weight,
-                  'ends': (map(lambda n: n.node_id, self.ends))}
+                  'ends': tuple(map(lambda n: n.node_id, self.ends))}
         return result
 
 
@@ -43,8 +43,8 @@ class NodeBase:
         return False
 
     def to_dict(self) -> Dict[str, Any]:
-        class_name = self.__class__.__name__
-        result = {'class_name': class_name}
+        result = {'class_name': self.__class__.__name__,
+                  'module_name': self.__class__.__module__}
         for attr in self.__dict__:
             if not attr.endswith('_'):
                 result[attr] = self.__dict__[attr]
