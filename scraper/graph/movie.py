@@ -12,5 +12,5 @@ class Movie(NodeBase):
         super().__post_init__()
         self.type = EntityType.MOVIE
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return super().__eq__(other)
