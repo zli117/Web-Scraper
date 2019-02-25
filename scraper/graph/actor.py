@@ -1,6 +1,8 @@
-from scraper.graph.node_base import NodeBase
+from dataclasses import field
+
+from scraper.graph.base_objects import NodeBase
 
 
 class Actor(NodeBase):
-    age: int
-    grossing_cache: float = 0
+    age: int = field(default=0)
+    grossing_cache: float = field(default=0)

@@ -1,6 +1,8 @@
-from scraper.graph.node_base import NodeBase
+from dataclasses import field
+
+from scraper.graph.base_objects import NodeBase
 
 
 class Movie(NodeBase):
-    year: int
-    total_grossing: float
+    year: int = field(default=0)
+    total_grossing: float = field(default=0)
