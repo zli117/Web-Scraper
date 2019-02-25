@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, NewType, Tuple
+from typing import Any, Dict, List, NewType, Tuple, cast
 
 from scraper.graph.entity_type import EntityType
 
@@ -25,7 +25,7 @@ class NodeBase:
     node_id: int = field(default=0)
     name: str = field(default='')
     type: EntityType = field(default=EntityType.MOVIE)
-    url: Url = field(default='')
+    url: Url = field(default=cast(Url, ''))
 
     def __post_init__(self):
         self._connections_: List[Edge] = []
@@ -43,7 +43,7 @@ class NodeBase:
         return False
 
     def to_dict(self) -> Dict[str, Any]:
-        class_name = __class__.__name__
+        class_name = self.__class__.__name__
         result = {'class_name': class_name}
         for attr in self.__dict__:
             if not attr.endswith('_'):

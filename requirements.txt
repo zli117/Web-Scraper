@@ -2,3 +2,4 @@ pytest
 pycodestyle
 mypy
 beautifulsoup4
+dataclasses
