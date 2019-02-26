@@ -57,7 +57,7 @@ def parse_infobox(infobox: Tag) -> Dict[str, Tag]:
 def page_type_parser(infobox: Dict[str, Tag]) -> PageType:
     # Check if movie
     image_caption = infobox.get('_image_caption', '')
-    if 'theatrical release poster' in image_caption:
+    if 'theatrical release poster' in image_caption.lower():
         return PageType.MOVIE
 
     # Check if actor
