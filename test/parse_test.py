@@ -3,8 +3,8 @@ import os
 import pytest
 from bs4 import BeautifulSoup
 
-from scraper.spider.parsing_strategy import (PageType, page_type_parser,
-                                             parse_infobox)
+from scraper.spider.parsing_strategy import (PageType, ParseActor,
+                                             parse_infobox, parse_page_type)
 
 
 @pytest.mark.parametrize('file_name, key_words', [
@@ -43,4 +43,22 @@ def test_page_type_parser(file_name, page_type):
     with open(os.path.join('test/test_files', file_name)) as html:
         infobox = BeautifulSoup(html).find_all('table', class_='infobox')[0]
         infobox_dict = parse_infobox(infobox)
-        assert page_type == page_type_parser(infobox_dict)
+        assert page_type == parse_page_type(infobox_dict)
+
+
+@pytest.mark.parametrize('file_name, name, age',
+                         [
+                            # ('actor3.html', 'Jay Baruchel', 36),
+                          ('actor1.html', 'Kelly Lai Chen', 84),
+                          # ('actor2.html', 'Jean Simmons', 80)
+                         ])
+def test_actor_parser(file_name, name, age):
+    with open(os.path.join('test/test_files', file_name)) as html:
+        actor_parser = ParseActor()
+        infobox = BeautifulSoup(html).find_all('table', class_='infobox')[0]
+        infobox_dict = parse_infobox(infobox)
+        url = 'test/%s' % (name.replace(' ', '_'))
+        actor = actor_parser(url, infobox_dict)
+        assert age == actor.age
+        assert url == actor.url
+        assert name == actor.name

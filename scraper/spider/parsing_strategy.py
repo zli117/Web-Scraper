@@ -1,8 +1,11 @@
 import re
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 from bs4.element import Tag
+
+from scraper.graph.actor import Actor
+from scraper.graph.base_objects import Url
 
 
 class PageType(Enum):
@@ -23,7 +26,7 @@ def parse_infobox(infobox: Tag) -> Dict[str, Tag]:
         if len(links) == 1:
             img_link: Tag = links[0]
             for sibling in img_link.next_siblings:
-                if sibling.name == 'div':
+                if sibling.name == 'div' and sibling.string is not None:
                     entry_dict['_image_caption'] = sibling.string.strip()
                     found = True
                     break
@@ -54,7 +57,7 @@ def parse_infobox(infobox: Tag) -> Dict[str, Tag]:
     return entry_dict
 
 
-def page_type_parser(infobox: Dict[str, Tag]) -> PageType:
+def parse_page_type(infobox: Dict[str, Tag]) -> PageType:
     # Check if movie
     image_caption = infobox.get('_image_caption', '')
     if 'theatrical release poster' in image_caption.lower():
@@ -67,3 +70,40 @@ def page_type_parser(infobox: Dict[str, Tag]) -> PageType:
             return PageType.ACTOR
 
     return PageType.OTHER
+
+
+class ParseActor:
+    def __call__(self, url: Url, infobox: Dict[str, Tag]) -> Optional[Actor]:
+        entity_name = url.split('/')[-1].replace('_', ' ')
+        actor = Actor(name=entity_name, url=url)
+
+        age_pattern = re.compile('.*\\(aged? ([0-9]+)\\)')
+        # TODO: Refactor this
+        if 'Born' in infobox:
+            extracted = age_pattern.match(
+                str(infobox['Born']).replace(u'\xa0', u' '))
+            if extracted:
+                age_str = extracted.group(1)
+                print(age_str)
+                if age_str.isdigit():
+                    actor.age = int(age_str)
+                    return actor
+                else:
+                    # TODO: Logging here and return
+                    return None
+
+        if 'Died' in infobox:
+            extracted = age_pattern.match(
+                str(infobox['Died']).replace(u'\xa0', u' '))
+            if extracted:
+                age_str = extracted.group(1)
+                print(age_str)
+                if age_str.isdigit():
+                    actor.age = int(age_str)
+                    return actor
+                else:
+                    # TODO: Logging here and return
+                    return None
+
+        # TODO: Logging here
+        return None
