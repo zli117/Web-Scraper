@@ -40,10 +40,9 @@ def test_parse_infobox(file_name, key_words):
                          [('movie1.html', PageType.MOVIE),
                           ('movie2.html', PageType.MOVIE),
                           ('actor2.html', PageType.ACTOR),
-                          ('tv1.html', PageType.OTHER)])
+                          ('tv1.html', PageType.OTHER),
+                          ('other.html', PageType.OTHER)])
 def test_page_type_parser(file_name, page_type):
     with open(os.path.join('test/test_files', file_name)) as html:
-        infobox = BeautifulSoup(html, 'html.parser').find_all(
-            'table', class_='infobox')[0]
-        infobox_dict = parse_infobox(infobox)
-        assert page_type == parse_page_type(infobox_dict)
+        soup = BeautifulSoup(html, 'html.parser')
+        assert page_type == parse_page_type(soup)
