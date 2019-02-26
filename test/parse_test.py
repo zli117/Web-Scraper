@@ -72,6 +72,6 @@ def test_actor_parser(file_name, name, age):
 def test_actor_parser(file_name, num_films):
     with open(os.path.join('test/test_files', file_name)) as html:
         actor_parser = ParseActor()
-        soup = BeautifulSoup(html.read().replace('\n', '').replace('\r', ''))
+        soup = BeautifulSoup(html.read())
         movies = actor_parser.parse_related_movies(soup.html)
         assert num_films == len(movies)

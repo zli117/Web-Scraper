@@ -127,15 +127,17 @@ class ParseActor:
                         and 'film' in headline_span[0].string.lower()):
                     found = False
                     for next_siblings in sibling.next_siblings:
-                        if next_siblings.name == 'table':
+                        if (hasattr(next_siblings, 'name')
+                                and next_siblings.name == 'table'):
                             table = next_siblings
                             found = True
                             break
                     if found:
                         break
         if table:
-            for tr in table.tbody:
-                for td in tr.contents:
+            for tr in filter(lambda tr: hasattr(tr, 'contents'), table.tbody):
+                for td in filter(lambda td: hasattr(td, 'find_all'),
+                                 tr.contents):
                     link = td.find_all('a', href=re.compile('/wiki/'))
                     if len(link) == 1:
                         urls.append(link[0].href)
