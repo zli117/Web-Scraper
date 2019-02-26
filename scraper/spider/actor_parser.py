@@ -7,7 +7,7 @@ from scraper.graph.actor import Actor
 from scraper.graph.base_objects import Url
 
 
-class ParseActor:
+class ActorParser:
     @staticmethod
     def parse_actor_object(url: Url,
                            infobox: Dict[str, Tag]) -> Optional[Actor]:
