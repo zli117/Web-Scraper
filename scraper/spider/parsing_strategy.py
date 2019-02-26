@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from bs4.element import Tag
 
@@ -73,7 +73,9 @@ def parse_page_type(infobox: Dict[str, Tag]) -> PageType:
 
 
 class ParseActor:
-    def __call__(self, url: Url, infobox: Dict[str, Tag]) -> Optional[Actor]:
+    @staticmethod
+    def parse_actor_object(url: Url,
+                           infobox: Dict[str, Tag]) -> Optional[Actor]:
         entity_name = url.split('/')[-1].replace('_', ' ')
         actor = Actor(name=entity_name, url=url)
 
@@ -107,3 +109,7 @@ class ParseActor:
 
         # TODO: Logging here
         return None
+
+    @staticmethod
+    def parse_related_movies(html: Tag) -> List[Url]:
+        return []

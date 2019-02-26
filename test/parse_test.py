@@ -21,6 +21,8 @@ from scraper.spider.parsing_strategy import (PageType, ParseActor,
      ['Born', 'Died', 'Years active', 'Spouse(s)', 'Children', 'Relatives']),
     ('actor2.html',
      ['Born', 'Died', 'Years active', 'Occupation', 'Children']),
+    ('actor4.html',
+     ['Born', 'Years active', 'Occupation', 'Children']),
     ('tv1.html',
      ['Genre', 'Created by', 'Developed by', 'Directed by', 'Starring',
       'Opening theme', 'Composer(s)', 'Producer(s)', 'Running time',
@@ -47,18 +49,17 @@ def test_page_type_parser(file_name, page_type):
 
 
 @pytest.mark.parametrize('file_name, name, age',
-                         [
-                            # ('actor3.html', 'Jay Baruchel', 36),
+                         [('actor3.html', 'Jay Baruchel', 36),
                           ('actor1.html', 'Kelly Lai Chen', 84),
-                          # ('actor2.html', 'Jean Simmons', 80)
-                         ])
+                          ('actor2.html', 'Jean Simmons', 80),
+                          ('actor4.html', 'Cate Blanchett', 49)])
 def test_actor_parser(file_name, name, age):
     with open(os.path.join('test/test_files', file_name)) as html:
         actor_parser = ParseActor()
         infobox = BeautifulSoup(html).find_all('table', class_='infobox')[0]
         infobox_dict = parse_infobox(infobox)
         url = 'test/%s' % (name.replace(' ', '_'))
-        actor = actor_parser(url, infobox_dict)
+        actor = actor_parser.parse_actor_object(url, infobox_dict)
         assert age == actor.age
         assert url == actor.url
         assert name == actor.name
