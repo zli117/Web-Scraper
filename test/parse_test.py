@@ -31,7 +31,8 @@ from scraper.spider.parse_actor import ParseActor
 ])
 def test_parse_infobox(file_name, key_words):
     with open(os.path.join('test/test_files', file_name)) as html:
-        infobox = BeautifulSoup(html).find_all('table', class_='infobox')[0]
+        infobox = BeautifulSoup(html, 'html.parser').find_all(
+            'table', class_='infobox')[0]
         info_dict = parse_infobox(infobox)
         for key_word in key_words:
             assert key_word in info_dict.keys()
@@ -44,7 +45,8 @@ def test_parse_infobox(file_name, key_words):
                           ('tv1.html', PageType.OTHER)])
 def test_page_type_parser(file_name, page_type):
     with open(os.path.join('test/test_files', file_name)) as html:
-        infobox = BeautifulSoup(html).find_all('table', class_='infobox')[0]
+        infobox = BeautifulSoup(html, 'html.parser').find_all(
+            'table', class_='infobox')[0]
         infobox_dict = parse_infobox(infobox)
         assert page_type == parse_page_type(infobox_dict)
 
@@ -57,7 +59,8 @@ def test_page_type_parser(file_name, page_type):
 def test_actor_parser(file_name, name, age):
     with open(os.path.join('test/test_files', file_name)) as html:
         actor_parser = ParseActor()
-        infobox = BeautifulSoup(html).find_all('table', class_='infobox')[0]
+        infobox = BeautifulSoup(html, 'html.parser').find_all(
+            'table', class_='infobox')[0]
         infobox_dict = parse_infobox(infobox)
         url = 'test/%s' % (name.replace(' ', '_'))
         actor = actor_parser.parse_actor_object(url, infobox_dict)
@@ -73,6 +76,6 @@ def test_actor_parser(file_name, name, age):
 def test_actor_parser(file_name, num_films):
     with open(os.path.join('test/test_files', file_name)) as html:
         actor_parser = ParseActor()
-        soup = BeautifulSoup(html.read())
+        soup = BeautifulSoup(html, 'html.parser')
         movies = actor_parser.parse_related_movies(soup.html)
         assert num_films == len(movies)
