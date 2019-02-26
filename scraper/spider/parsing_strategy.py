@@ -111,5 +111,36 @@ class ParseActor:
         return None
 
     @staticmethod
-    def parse_related_movies(html: Tag) -> List[Url]:
-        return []
+    def parse_related_movies(html: Tag) -> Optional[List[Url]]:
+        urls = []
+        filmography_sections = html.find_all('span', id='Filmography')
+        if len(filmography_sections) != 1:
+            # TODO: Logging
+            return None
+        filmography: Tag = filmography_sections[0].parent
+        table = None
+        for sibling in filmography.next_siblings:
+            if sibling.name == 'h3':
+                headline_span: Tag = sibling.find_all('span', id='Film')
+                # We found the headline for the film table
+                if (len(headline_span) == 1
+                        and 'film' in headline_span[0].string.lower()):
+                    found = False
+                    for next_siblings in sibling.next_siblings:
+                        if next_siblings.name == 'table':
+                            table = next_siblings
+                            found = True
+                            break
+                    if found:
+                        break
+        if table:
+            for tr in table.tbody:
+                for td in tr.contents:
+                    link = td.find_all('a', href=re.compile('/wiki/'))
+                    if len(link) == 1:
+                        urls.append(link[0].href)
+                        break
+                    elif len(link) > 1:
+                        # TODO: Logging
+                        return None
+        return urls

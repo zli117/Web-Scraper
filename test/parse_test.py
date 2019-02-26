@@ -63,3 +63,15 @@ def test_actor_parser(file_name, name, age):
         assert age == actor.age
         assert url == actor.url
         assert name == actor.name
+
+
+@pytest.mark.parametrize('file_name, num_films',
+                         [('actor3.html', 36),
+                          ('actor5.html', 26),
+                          ('actor6.html', 33)])
+def test_actor_parser(file_name, num_films):
+    with open(os.path.join('test/test_files', file_name)) as html:
+        actor_parser = ParseActor()
+        soup = BeautifulSoup(html.read().replace('\n', '').replace('\r', ''))
+        movies = actor_parser.parse_related_movies(soup.html)
+        assert num_films == len(movies)
