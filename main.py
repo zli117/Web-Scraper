@@ -60,13 +60,16 @@ if __name__ == '__main__':
     else:
         spider = SpiderRunner(cast(Url, '/wiki/Titanic_(1997_film)'),
                               actor_limit=args.actors, movie_limit=args.movies)
-        spider.run()
+        try:
+            spider.run()
+        except KeyboardInterrupt:
+            logger.info('Terminated due to keyboard interrupt')
         graph = spider.graph
-        if args.file is not None:
+        if args.out is not None:
             json_str = graph.serialize()
-            if not os.path.exists(os.path.dirname(args.file)):
-                os.mkdir(os.path.dirname(args.file))
-            with open(args.file, 'w') as f:
+            if not os.path.exists(os.path.dirname(args.out)):
+                os.mkdir(os.path.dirname(args.out))
+            with open(args.out, 'w') as f:
                 f.write(json_str)
 
     shell = ShellRunner(graph)

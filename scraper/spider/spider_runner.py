@@ -72,15 +72,15 @@ class SpiderRunner:
                 self.queue.put((movie, None, 0))
 
     def run(self):
-        with tqdm(total=100) as progress_bar:
+        fmt = '{l_bar}{bar}[{elapsed}<{remaining}, {rate_fmt}{postfix} ]'
+        with tqdm(total=100, bar_format=fmt) as progress_bar:
             previous_percent = 0
             while not self.queue.empty():
                 url, predecessor, weight = self.queue.get()
-                logger.log(logging.INFO, url)
-                logger.log(logging.DEBUG,
-                           '%s %s %s' % (url, predecessor, weight))
+                logger.info(url)
+                logger.debug('%s %s %s' % (url, predecessor, weight))
                 if self.graph.check_node_exist(url):
-                    logger.log(logging.DEBUG, 'skip %s' % url)
+                    logger.debug('skip %s' % url)
 
                 actor_parser = ActorParser(url)
                 full_url = self.get_full_url(url)
@@ -93,7 +93,7 @@ class SpiderRunner:
                     self._process_movie(url, soup.html, infobox)
                 num_actors = self.graph.num_node(EntityType.ACTOR)
                 num_movies = self.graph.num_node(EntityType.MOVIE)
-                progress = 'actor: %d, movie: %d' % (
+                progress = '\033[92mactor: %d, movie: %d\033[0m' % (
                     self.graph.num_node(EntityType.ACTOR),
                     self.graph.num_node(EntityType.MOVIE))
                 percentage = ((min(num_actors,
