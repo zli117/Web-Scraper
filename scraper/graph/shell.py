@@ -93,7 +93,8 @@ class ShellRunner:
     def top_actor_grossing_value(self, n: str) -> None:
         if n.isdigit():
             number = int(n)
-            actors = self.graph.query_nodes({'type': EntityType.ACTOR})
+            actors = cast(List[Actor],
+                          self.graph.query_nodes({'type': EntityType.ACTOR}))
             sorted_actors = sorted(actors, key=lambda actor: actor.grossing,
                                    reverse=True)
             for i in range(min(len(sorted_actors), number)):
@@ -105,7 +106,8 @@ class ShellRunner:
     def oldest_actors(self, n: str) -> None:
         if n.isdigit():
             number = int(n)
-            actors = self.graph.query_nodes({'type': EntityType.ACTOR})
+            actors = cast(List[Actor],
+                          self.graph.query_nodes({'type': EntityType.ACTOR}))
             sorted_actors = sorted(actors, key=lambda actor: actor.age,
                                    reverse=True)
             for i in range(min(len(sorted_actors), number)):
