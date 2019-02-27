@@ -1,5 +1,5 @@
 import re
-from typing import Dict
+from typing import Dict, List
 
 from bs4.element import Tag
 
@@ -43,3 +43,16 @@ class MovieParser:
             pass
 
         return movie
+
+    @staticmethod
+    def parse_staring(infobox: Dict[str, Tag]) -> List[Url]:
+        urls = []
+        if 'Starring' in infobox:
+            for link in infobox['Starring'].find_all(
+                    'a', href=re.compile('/wiki/')):
+                urls.append(link.href)
+        else:
+            # TODO: Log
+            pass
+
+        return urls
