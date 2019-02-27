@@ -10,6 +10,10 @@ from scraper.graph.movie import Movie
 
 logger = logging.getLogger('Web-Scraper')
 
+CURRENCY_CONVERSION = {'$': 1}
+
+UNIT_CONVERSION = {'million': 1e6, 'billion': 1e9}
+
 
 class MovieParser:
     def __init__(self, url: Url):
@@ -32,19 +36,27 @@ class MovieParser:
             else:
                 logger.log(logging.WARN, 'Year not found for %s' % self.url)
         else:
-            logger.log(logging.WARN, 'Release date not found for %s' % self.url)
+            currency = logger.log(logging.WARN,
+                                  'Release date not found for %s' % self.url)
 
-        grossing_pattern = re.compile('\\$([1-9][0-9]*(\\.[0-9]+)?) million')
+        grossing_pattern = re.compile(
+            '(\\$)([1-9][0-9]*(\\.[0-9]+)?) ((million)|(billion))')
         grossing_pattern_2 = re.compile(
-            '\\$(([1-9]|[1-9][0-9]|[1-9][0-9][0-9])(,[0-9][0-9][0-9])*)\\D')
+            '(\\$)(([1-9]|[1-9][0-9]|[1-9][0-9][0-9])(,[0-9][0-9][0-9])*)\\D')
         if 'Box office' in infobox:
             tag = infobox['Box office']
             tag_str = str(tag).replace(u'\xa0', u' ')
             matched_grossing = (grossing_pattern.search(tag_str)
                                 or grossing_pattern_2.search(tag_str))
             if matched_grossing:
-                grossing = float(matched_grossing.group(1).replace(',', ''))
-                movie.total_grossing = grossing
+                grossing = float(matched_grossing.group(2).replace(',', ''))
+                currency = matched_grossing.group(1)
+                converted_value = CURRENCY_CONVERSION.get(currency,
+                                                          1) * grossing
+                unit = UNIT_CONVERSION.get(matched_grossing.group(4), 1)
+                movie.total_grossing = converted_value * unit
+            else:
+                logger.error('Money format not recognized for %s' % self.url)
         else:
             logger.log(logging.WARN, 'Box office not found for %s' % self.url)
 
