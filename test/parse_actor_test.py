@@ -35,3 +35,5 @@ def test_actor_movie_parser(file_name, num_films):
         soup = BeautifulSoup(html, 'html.parser')
         movies = actor_parser.parse_related_movies(soup.html)
         assert num_films == len(movies)
+        for movie in movies:
+            assert movie is not None

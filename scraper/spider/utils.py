@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 from bs4.element import Tag
 
@@ -54,19 +54,20 @@ def parse_infobox(infobox: Tag) -> Dict[str, Tag]:
     return entry_dict
 
 
-def parse_page_type(html: Tag) -> PageType:
+def parse_page_type_get_infobox(
+        html: Tag) -> Tuple[PageType, Optional[Dict[str, Tag]]]:
     infoboxes = html.find_all('table', class_='infobox')
     if len(infoboxes) == 1:
         infobox_dict = parse_infobox(infoboxes[0])
         # Check if movie
         image_caption = infobox_dict.get('_image_caption', '')
         if 'theatrical release poster' in image_caption.lower():
-            return PageType.MOVIE
+            return PageType.MOVIE, infobox_dict
 
         # Check if actor
         if 'Occupation' in infobox_dict:
             occupation = infobox_dict['Occupation']
             if occupation(text=re.compile('(Actor|actor|Actress|actress)')):
-                return PageType.ACTOR
+                return PageType.ACTOR, infobox_dict
 
-    return PageType.OTHER
+    return PageType.OTHER, None

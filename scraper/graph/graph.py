@@ -2,7 +2,7 @@ import importlib
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-from scraper.graph.base_objects import Edge, NodeBase, Url
+from scraper.graph.base_objects import Edge, EntityType, NodeBase, Url
 
 
 class Graph:
@@ -10,6 +10,10 @@ class Graph:
         self._nodes: List[NodeBase] = []
         self._edges: List[Edge] = []
         self._url_to_node: Dict[Url, NodeBase] = {}
+
+    def num_node(self, node_type: EntityType) -> int:
+        return sum(
+            map(lambda node: 1 if node.type == node_type else 0, self._nodes))
 
     @property
     def nodes(self) -> Tuple[NodeBase, ...]:

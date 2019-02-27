@@ -3,7 +3,7 @@ import os
 import pytest
 from bs4 import BeautifulSoup
 
-from scraper.spider.utils import (PageType, parse_infobox, parse_page_type)
+from scraper.spider.utils import (PageType, parse_infobox, parse_page_type_get_infobox)
 
 
 @pytest.mark.parametrize('file_name, key_words', [
@@ -45,4 +45,4 @@ def test_parse_infobox(file_name, key_words):
 def test_page_type_parser(file_name, page_type):
     with open(os.path.join('test/test_files', file_name)) as html:
         soup = BeautifulSoup(html, 'html.parser')
-        assert page_type == parse_page_type(soup)
+        assert page_type == parse_page_type_get_infobox(soup)[0]

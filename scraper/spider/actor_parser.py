@@ -21,7 +21,6 @@ class ActorParser:
                 str(infobox['Born']).replace(u'\xa0', u' '))
             if extracted:
                 age_str = extracted.group(1)
-                print(age_str)
                 actor.age = int(age_str)
                 return actor
 
@@ -30,7 +29,6 @@ class ActorParser:
                 str(infobox['Died']).replace(u'\xa0', u' '))
             if extracted:
                 age_str = extracted.group(1)
-                print(age_str)
                 actor.age = int(age_str)
                 return actor
 
@@ -38,12 +36,12 @@ class ActorParser:
         return actor
 
     @staticmethod
-    def parse_related_movies(html: Tag) -> Optional[List[Url]]:
+    def parse_related_movies(html: Tag) -> List[Url]:
         urls = []
         filmography_sections = html.find_all('span', id='Filmography')
         if len(filmography_sections) != 1:
             # TODO: Logging
-            return None
+            return []
         filmography: Tag = filmography_sections[0].parent
         table = None
         for sibling in filmography.next_siblings:
@@ -67,9 +65,9 @@ class ActorParser:
                                  tr.contents):
                     link = td.find_all('a', href=re.compile('/wiki/'))
                     if len(link) == 1:
-                        urls.append(link[0].href)
+                        urls.append(link[0].attrs['href'])
                         break
                     elif len(link) > 1:
                         # TODO: Logging
-                        return None
+                        pass
         return urls

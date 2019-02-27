@@ -31,13 +31,12 @@ class MovieParser:
 
         grossing_pattern = re.compile('\\$([1-9][0-9]*(\\.[0-9]+)?) million')
         grossing_pattern_2 = re.compile(
-            '\\$(([1-9]|[1-9][0-9]|[1-9][0-9][0-9])(,[0-9][0-9][0-9])*)\D')
+            '\\$(([1-9]|[1-9][0-9]|[1-9][0-9][0-9])(,[0-9][0-9][0-9])*)\\D')
         if 'Box office' in infobox:
             tag = infobox['Box office']
             tag_str = str(tag).replace(u'\xa0', u' ')
             matched_grossing = (grossing_pattern.search(tag_str)
                                 or grossing_pattern_2.search(tag_str))
-            print(matched_grossing.group(1))
             if matched_grossing:
                 grossing = float(matched_grossing.group(1).replace(',', ''))
                 movie.total_grossing = grossing
@@ -54,7 +53,7 @@ class MovieParser:
         if 'Starring' in infobox:
             for link in infobox['Starring'].find_all(
                     'a', href=re.compile('/wiki/')):
-                urls.append(link.href)
+                urls.append(link.attrs['href'])
         else:
             # TODO: Log
             pass
@@ -82,7 +81,7 @@ class MovieParser:
             for li in cast_list.find_all('li'):
                 link = li.find('a', href=re.compile('/wiki/'))
                 if link:
-                    urls.append(link.href)
+                    urls.append(link.attrs['href'])
         else:
             # TODO: Log
             pass

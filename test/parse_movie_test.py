@@ -14,7 +14,8 @@ from scraper.spider.utils import parse_infobox
                            274.9),
                           ('movie2.html', 'The Wandering Earth', 2019, 650),
                           ('movie4.html', 'JFK', 1991, 205.4),
-                          ('movie5.html', 'Making Mr. Right', 1987, 1584970)])
+                          ('movie5.html', 'Making Mr. Right', 1987, 1584970),
+                          ('movie6.html', 'Titanic (1997 film)', 1997, 2)])
 def test_movie_parser(file_name, name, year, grossing):
     with open(os.path.join('test/test_files', file_name)) as html:
         movie_parser = MovieParser()
@@ -32,7 +33,8 @@ def test_movie_parser(file_name, name, year, grossing):
                          [('movie3.html', 2),
                           ('movie1.html', 5),
                           ('movie2.html', 4),
-                          ('movie4.html', 9)])
+                          ('movie4.html', 9),
+                          ('movie6.html', 10)])
 def test_movie_starring(file_name, num_starring):
     with open(os.path.join('test/test_files', file_name)) as html:
         movie_parser = MovieParser()
@@ -41,6 +43,8 @@ def test_movie_starring(file_name, num_starring):
         infobox_dict = parse_infobox(infobox)
         stars = movie_parser.parse_staring(infobox_dict)
         assert num_starring == len(stars)
+        for star in stars:
+            assert star is not None
 
 
 @pytest.mark.parametrize('file_name, num_casting',
@@ -48,10 +52,14 @@ def test_movie_starring(file_name, num_starring):
                           ('movie1.html', 16),
                           ('movie2.html', 5),
                           ('movie4.html', 34),
-                          ('movie5.html', 0)])
-def test_movie_starring(file_name, num_casting):
+                          ('movie5.html', 0),
+                          ('movie6.html', 10)])
+def test_movie_casting(file_name, num_casting):
     with open(os.path.join('test/test_files', file_name)) as html:
         movie_parser = MovieParser()
         soup = BeautifulSoup(html, 'html.parser')
         casts = movie_parser.parse_cast(soup.html)
         assert num_casting == len(casts)
+        print(casts)
+        for cast in casts:
+            assert cast is not None
