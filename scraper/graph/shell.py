@@ -1,9 +1,12 @@
+import logging
 from typing import List, Optional, cast
 
 from scraper.graph.actor import Actor
 from scraper.graph.base_objects import EntityType
 from scraper.graph.graph import Graph
 from scraper.graph.movie import Movie
+
+logger = logging.getLogger('Web-Scraper')
 
 
 class ShellRunner:
@@ -31,8 +34,7 @@ class ShellRunner:
             args = list(filter(lambda s: len(s) > 0,
                                map(lambda s: s.strip(),
                                    command[command.find(' '):].split(','))))
-            print(func)
-            print(args)
+
             if func in self.commands and len(args) == self.commands[func]:
                 getattr(self, func)(*args)
             else:
