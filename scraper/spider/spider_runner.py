@@ -1,9 +1,11 @@
+import logging
 from queue import LifoQueue, Queue
 from typing import Dict, Type, cast
 from urllib import parse, request
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
+from tqdm import tqdm
 
 from scraper.graph.base_objects import EntityType, Url
 from scraper.graph.graph import Graph
@@ -11,6 +13,8 @@ from scraper.graph.movie import Movie
 from scraper.spider.actor_parser import ActorParser
 from scraper.spider.movie_parser import MovieParser
 from scraper.spider.utils import PageType, parse_page_type_get_infobox
+
+logger = logging.getLogger('Web-Scraper')
 
 
 class SpiderRunner:
@@ -25,8 +29,6 @@ class SpiderRunner:
         """
         self.init_url = init_url
         self.graph = Graph()
-        self.actor_parser = ActorParser()
-        self.movie_parser = MovieParser()
         # Contains tuple of (url, predecessor, weight)
         self.queue = queue()
         self.queue.put((init_url, None, 0))
@@ -39,15 +41,14 @@ class SpiderRunner:
 
     def _process_movie(self, url: Url, html: Tag,
                        infobox: Dict[str, Tag]) -> None:
-        movie = self.movie_parser.parse_movie_object(url, infobox)
+        parser = MovieParser(url)
+        movie = parser.parse_movie_object(infobox)
         if self.graph.add_node(movie):
-            stars = self.movie_parser.parse_staring(infobox)
-            casts = self.movie_parser.parse_cast(html)
+            stars = parser.parse_staring(infobox)
+            casts = parser.parse_cast(html)
             total_actors = stars
             actors_added = set(total_actors)
             # Distribute weight according to the order
-            print('cast: ', casts)
-            print('star: ', stars)
             for actor in casts:
                 if actor not in actors_added:
                     total_actors.append(actor)
@@ -58,39 +59,53 @@ class SpiderRunner:
 
     def _process_actor(self, url: Url, html: Tag, infobox: Dict[str, Tag],
                        predecessor: Movie, weight: float) -> None:
-        actor = self.actor_parser.parse_actor_object(url, infobox)
+        parser = ActorParser(url)
+        actor = parser.parse_actor_object(infobox)
         if self.graph.add_node(actor):
             if predecessor:
                 edge = self.graph.add_relationship(
                     predecessor.node_id, actor.node_id)
                 if edge:
                     edge.weight = weight
-            movies = self.actor_parser.parse_related_movies(html)
+            movies = parser.parse_related_movies(html)
             for movie in movies:
                 self.queue.put((movie, None, 0))
 
     def run(self):
-        while not self.queue.empty():
-            url, predecessor, weight = self.queue.get()
-            print(url, predecessor, weight)
-            if self.graph.check_node_exist(url):
-                continue
-            full_url = self.get_full_url(url)
-            soup = BeautifulSoup(request.urlopen(full_url))
-            page_type, infobox = parse_page_type_get_infobox(soup.html)
-            if page_type == PageType.ACTOR:
-                self._process_actor(url, soup.html, infobox, predecessor,
-                                    weight)
-            elif page_type == PageType.MOVIE:
-                self._process_movie(url, soup.html, infobox)
-            string = 'actor: %d, movie: %d' % (
-                self.graph.num_node(EntityType.ACTOR),
-                self.graph.num_node(EntityType.MOVIE))
-            print('\033[93m' + string + '\033[0m')
-            if (0 < self.actor_limit < self.graph.num_node(EntityType.ACTOR)
-                    and 0 < self.movie_limit < self.graph.num_node(
-                        EntityType.MOVIE)):
-                break
+        with tqdm(total=100) as progress_bar:
+            previous_percent = 0
+            while not self.queue.empty():
+                url, predecessor, weight = self.queue.get()
+                logger.log(logging.INFO, url)
+                logger.log(logging.DEBUG,
+                           '%s %s %s' % (url, predecessor, weight))
+                if self.graph.check_node_exist(url):
+                    logger.log(logging.DEBUG, 'skip %s' % url)
+
+                actor_parser = ActorParser(url)
+                full_url = self.get_full_url(url)
+                soup = BeautifulSoup(request.urlopen(full_url), features="lxml")
+                page_type, infobox = parse_page_type_get_infobox(soup.html)
+                if page_type == PageType.ACTOR:
+                    self._process_actor(url, soup.html, infobox, predecessor,
+                                        weight)
+                elif page_type == PageType.MOVIE:
+                    self._process_movie(url, soup.html, infobox)
+                num_actors = self.graph.num_node(EntityType.ACTOR)
+                num_movies = self.graph.num_node(EntityType.MOVIE)
+                progress = 'actor: %d, movie: %d' % (
+                    self.graph.num_node(EntityType.ACTOR),
+                    self.graph.num_node(EntityType.MOVIE))
+                percentage = ((min(num_actors,
+                                   self.actor_limit) / self.actor_limit
+                               + min(num_movies,
+                                     self.movie_limit) / self.movie_limit) / 2)
+                progress_bar.update((percentage - previous_percent) * 100)
+                previous_percent = percentage
+                progress_bar.set_postfix_str(progress)
+                if (0 < self.actor_limit < num_actors
+                        and 0 < self.movie_limit < num_movies):
+                    break
 
     def save(self, out_file: str) -> None:
         json_str = self.graph.serialize()

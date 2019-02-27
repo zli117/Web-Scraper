@@ -1,18 +1,24 @@
+import logging
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
+from urllib import parse
 
 from bs4.element import Tag
 
 from scraper.graph.actor import Actor
 from scraper.graph.base_objects import Url
 
+logger = logging.getLogger('Web-Scraper')
+
 
 class ActorParser:
-    @staticmethod
-    def parse_actor_object(url: Url,
-                           infobox: Dict[str, Tag]) -> Actor:
-        entity_name = url.split('/')[-1].replace('_', ' ')
-        actor = Actor(name=entity_name, url=url)
+    def __init__(self, url: Url):
+        self.url = url
+
+    def parse_actor_object(self, infobox: Dict[str, Tag]) -> Actor:
+        unquoted_url = parse.unquote(self.url)
+        entity_name = unquoted_url.split('/')[-1].replace('_', ' ')
+        actor = Actor(name=entity_name, url=self.url)
 
         age_pattern = re.compile('.*\\(aged? ([0-9]+)\\)')
         # TODO: Refactor this
@@ -32,15 +38,15 @@ class ActorParser:
                 actor.age = int(age_str)
                 return actor
 
-        # TODO: Logging here
+        logger.log(logging.WARN, 'Age not found for actor %s' % self.url)
         return actor
 
-    @staticmethod
-    def parse_related_movies(html: Tag) -> List[Url]:
+    def parse_related_movies(self, html: Tag) -> List[Url]:
         urls = []
         filmography_sections = html.find_all('span', id='Filmography')
         if len(filmography_sections) != 1:
-            # TODO: Logging
+            logger.log(logging.WARN,
+                       'Filmography section not found for actor %s' % self.url)
             return []
         filmography: Tag = filmography_sections[0].parent
         table = None
@@ -67,7 +73,4 @@ class ActorParser:
                     if len(link) == 1:
                         urls.append(link[0].attrs['href'])
                         break
-                    elif len(link) > 1:
-                        # TODO: Logging
-                        pass
         return urls

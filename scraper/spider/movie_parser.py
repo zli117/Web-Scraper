@@ -1,17 +1,24 @@
+import logging
 import re
 from typing import Dict, List
+from urllib import parse
 
 from bs4.element import Tag
 
 from scraper.graph.base_objects import Url
 from scraper.graph.movie import Movie
 
+logger = logging.getLogger('Web-Scraper')
+
 
 class MovieParser:
-    @staticmethod
-    def parse_movie_object(url: Url, infobox: Dict[str, Tag]) -> Movie:
-        entity_name = url.split('/')[-1].replace('_', ' ')
-        movie = Movie(name=entity_name, url=url)
+    def __init__(self, url: Url):
+        self.url = url
+
+    def parse_movie_object(self, infobox: Dict[str, Tag]) -> Movie:
+        unquoted_url = parse.unquote(self.url)
+        entity_name = unquoted_url.split('/')[-1].replace('_', ' ')
+        movie = Movie(name=entity_name, url=self.url)
 
         # Refactor this
         year_pattern = re.compile('([0-9][0-9][0-9][0-9])')
@@ -23,11 +30,9 @@ class MovieParser:
                 year = int(matched_year.group(0))
                 movie.year = year
             else:
-                # TODO: Log
-                pass
+                logger.log(logging.WARN, 'Year not found for %s' % self.url)
         else:
-            # TODO: Log
-            pass
+            logger.log(logging.WARN, 'Release date not found for %s' % self.url)
 
         grossing_pattern = re.compile('\\$([1-9][0-9]*(\\.[0-9]+)?) million')
         grossing_pattern_2 = re.compile(
@@ -40,33 +45,30 @@ class MovieParser:
             if matched_grossing:
                 grossing = float(matched_grossing.group(1).replace(',', ''))
                 movie.total_grossing = grossing
-            # TODO: Log
         else:
-            # TODO: Log
-            pass
+            logger.log(logging.WARN, 'Box office not found for %s' % self.url)
 
         return movie
 
-    @staticmethod
-    def parse_staring(infobox: Dict[str, Tag]) -> List[Url]:
+    def parse_staring(self, infobox: Dict[str, Tag]) -> List[Url]:
         urls = []
         if 'Starring' in infobox:
             for link in infobox['Starring'].find_all(
                     'a', href=re.compile('/wiki/')):
                 urls.append(link.attrs['href'])
         else:
-            # TODO: Log
-            pass
+            logger.log(logging.WARN, 'Starring not found for %s' % self.url)
 
         return urls
 
-    @staticmethod
-    def parse_cast(html: Tag) -> List[Url]:
+    def parse_cast(self, html: Tag) -> List[Url]:
         urls: List[Url] = []
         cast_h2 = html.find_all(
             lambda tag: tag.name == 'h2' and tag.find_all('span', id='Cast'))
         if len(cast_h2) != 1:
-            # TODO: Log
+            logger.log(logging.WARN,
+                       '%d cast section found for %s' % (
+                           len(cast_h2), self.url))
             return urls
         cast_list = None
         for sibling in cast_h2[0].next_siblings:
@@ -83,7 +85,7 @@ class MovieParser:
                 if link:
                     urls.append(link.attrs['href'])
         else:
-            # TODO: Log
+            logger.log(logging.WARN, 'No cast list for %s' % self.url)
             pass
 
         return urls
