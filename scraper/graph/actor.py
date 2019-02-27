@@ -6,6 +6,9 @@ from scraper.graph.movie import Movie
 
 @dataclass
 class Actor(NodeBase):
+    """
+    Actor node
+    """
     age: int = field(default=0)
 
     def __post_init__(self) -> None:
@@ -14,6 +17,11 @@ class Actor(NodeBase):
 
     @property
     def grossing(self) -> float:
+        """
+        Get the total grossing for the actor
+        Returns:
+            the grossing
+        """
         total = 0.0
         for edge in self.get_edges():
             for node in edge.ends:

@@ -16,10 +16,21 @@ UNIT_CONVERSION = {'million': 1e6, 'billion': 1e9}
 
 
 class MovieParser:
+    """
+    Parser for movie
+    """
     def __init__(self, url: Url):
         self.url = url
 
     def parse_movie_object(self, infobox: Dict[str, Tag]) -> Movie:
+        """
+        Parse and construct movie object
+        Args:
+            infobox: The infobox dict
+
+        Returns:
+            movie object
+        """
         unquoted_url = parse.unquote(self.url)
         entity_name = unquoted_url.split('/')[-1].replace('_', ' ')
         movie = Movie(name=entity_name, url=self.url)
@@ -63,6 +74,14 @@ class MovieParser:
         return movie
 
     def parse_staring(self, infobox: Dict[str, Tag]) -> List[Url]:
+        """
+        Parse the list of staring actors
+        Args:
+            infobox: The infobox
+
+        Returns:
+            A list of actors
+        """
         urls = []
         if 'Starring' in infobox:
             for link in infobox['Starring'].find_all(
@@ -74,6 +93,14 @@ class MovieParser:
         return urls
 
     def parse_cast(self, html: Tag) -> List[Url]:
+        """
+        Parse the list of casting actors
+        Args:
+            html: The page
+
+        Returns:
+            A list of actors
+        """
         urls: List[Url] = []
         cast_h2 = html.find_all(
             lambda tag: tag.name == 'h2' and tag.find_all('span', id='Cast'))

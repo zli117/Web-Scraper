@@ -12,6 +12,14 @@ class PageType(Enum):
 
 
 def parse_infobox(infobox: Tag) -> Dict[str, Tag]:
+    """
+    Parse infobox to a dictionary
+    Args:
+        infobox: The table
+
+    Returns:
+        A dictionary
+    """
     entries = list(filter(lambda e: isinstance(e, Tag), infobox.tbody.contents))
     entry_dict = {}
     # First find image caption:
@@ -56,6 +64,14 @@ def parse_infobox(infobox: Tag) -> Dict[str, Tag]:
 
 def parse_page_type_get_infobox(
         html: Tag) -> Tuple[PageType, Optional[Dict[str, Tag]]]:
+    """
+    Find the type of page (MOVIE vs ACTOR vs OTHER)
+    Args:
+        html: The page
+
+    Returns:
+        The type of the page
+    """
     infoboxes = html.find_all('table', class_='infobox')
     if len(infoboxes) == 1:
         infobox_dict = parse_infobox(infoboxes[0])

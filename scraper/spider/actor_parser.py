@@ -12,10 +12,21 @@ logger = logging.getLogger('Web-Scraper')
 
 
 class ActorParser:
+    """
+    Parser for actor
+    """
     def __init__(self, url: Url):
         self.url = url
 
     def parse_actor_object(self, infobox: Dict[str, Tag]) -> Actor:
+        """
+        Parse and construct actor object
+        Args:
+            infobox:
+
+        Returns:
+            Actor object
+        """
         unquoted_url = parse.unquote(self.url)
         entity_name = unquoted_url.split('/')[-1].replace('_', ' ')
         actor = Actor(name=entity_name, url=self.url)
@@ -42,6 +53,14 @@ class ActorParser:
         return actor
 
     def parse_related_movies(self, html: Tag) -> List[Url]:
+        """
+        Parse all the related movies
+        Args:
+            html: The page
+
+        Returns:
+            List of urls
+        """
         urls = []
         filmography_sections = html.find_all('span', id='Filmography')
         if len(filmography_sections) != 1:
