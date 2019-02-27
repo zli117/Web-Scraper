@@ -3,7 +3,8 @@ import os
 import pytest
 from bs4 import BeautifulSoup
 
-from scraper.spider.utils import (PageType, parse_infobox, parse_page_type_get_infobox)
+from scraper.spider.utils import (PageType, parse_infobox,
+                                  parse_page_type_get_infobox)
 
 
 @pytest.mark.parametrize('file_name, key_words', [
