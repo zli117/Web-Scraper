@@ -8,6 +8,9 @@ Url = NewType('Url', str)
 
 @dataclass
 class Edge:
+    """
+    Edge
+    """
     weight: float
     ends: Tuple['NodeBase', 'NodeBase']
 
@@ -22,6 +25,9 @@ class Edge:
 
 @dataclass
 class NodeBase:
+    """
+    The base of a node
+    """
     node_id: int = field(default=0)
     name: str = field(default='')
     type: EntityType = field(default=EntityType.MOVIE)

@@ -10,6 +10,9 @@ logger = logging.getLogger('Web-Scraper')
 
 
 class ShellRunner:
+    """
+    A shell for interacting with the graph
+    """
 
     def __init__(self, graph: Graph) -> None:
         self.graph = graph
@@ -27,6 +30,9 @@ class ShellRunner:
                          'get_actor_of_year': 1}
 
     def start(self) -> None:
+        """
+        Start the shell
+        """
         self.terminated = False
         while not self.terminated:
             command = input('\033[94m### \033[0m').strip() + ' '

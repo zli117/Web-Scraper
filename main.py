@@ -1,6 +1,5 @@
 import argparse
 import logging
-import os
 import sys
 from typing import cast
 
@@ -47,6 +46,8 @@ if __name__ == '__main__':
                         help='Number of actors to scrape', default=250)
     parser.add_argument('-m', '--movies', type=int,
                         help='Number of movies to scrape', default=125)
+    parser.add_argument('-s', '--start', type=str, help='Starting url',
+                        default='/wiki/Titanic_(1997_film)')
     if len(sys.argv) == 1:
         parser.print_help()
         exit()
@@ -61,13 +62,8 @@ if __name__ == '__main__':
         spider = SpiderRunner(cast(Url, '/wiki/Titanic_(1997_film)'),
                               actor_limit=args.actors, movie_limit=args.movies)
         spider.run()
+        spider.save(args.out)
         graph = spider.graph
-        if args.file is not None:
-            json_str = graph.serialize()
-            if not os.path.exists(os.path.dirname(args.file)):
-                os.mkdir(os.path.dirname(args.file))
-            with open(args.file, 'w') as f:
-                f.write(json_str)
 
     shell = ShellRunner(graph)
     shell.start()

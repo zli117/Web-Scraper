@@ -8,14 +8,16 @@ from scraper.spider.utils import parse_infobox
 
 
 @pytest.mark.parametrize('file_name, name, year, grossing',
-                         [('movie3.html', 'Uncle Buck', 1989, 79.2),
+                         [('movie3.html', 'Uncle Buck', 1989, 79.2 * 1e6),
                           ('movie1.html',
                            'How to Train Your Dragon: The Hidden World', 2019,
-                           274.9),
-                          ('movie2.html', 'The Wandering Earth', 2019, 650),
-                          ('movie4.html', 'JFK', 1991, 205.4),
+                           274.9 * 1e6),
+                          ('movie2.html', 'The Wandering Earth', 2019,
+                           650 * 1e6),
+                          ('movie4.html', 'JFK', 1991, 205.4 * 1e6),
                           ('movie5.html', 'Making Mr. Right', 1987, 1584970),
-                          ('movie6.html', 'Titanic (1997 film)', 1997, 2)])
+                          ('movie6.html', 'Titanic (1997 film)', 1997,
+                           2.187 * 1e9)])
 def test_movie_parser(file_name, name, year, grossing):
     with open(os.path.join('test/test_files', file_name)) as html:
         infobox = BeautifulSoup(html, 'html.parser').find_all(
