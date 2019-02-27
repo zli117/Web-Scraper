@@ -47,6 +47,8 @@ if __name__ == '__main__':
                         help='Number of actors to scrape', default=250)
     parser.add_argument('-m', '--movies', type=int,
                         help='Number of movies to scrape', default=125)
+    parser.add_argument('-s', '--start', type=str, help='Starting url',
+                        default='/wiki/Titanic_(1997_film)')
     if len(sys.argv) == 1:
         parser.print_help()
         exit()
@@ -60,10 +62,7 @@ if __name__ == '__main__':
     else:
         spider = SpiderRunner(cast(Url, '/wiki/Titanic_(1997_film)'),
                               actor_limit=args.actors, movie_limit=args.movies)
-        try:
-            spider.run()
-        except KeyboardInterrupt:
-            logger.info('Terminated due to keyboard interrupt')
+        spider.run()
         graph = spider.graph
         if args.out is not None:
             json_str = graph.serialize()

@@ -72,42 +72,49 @@ class SpiderRunner:
                 self.queue.put((movie, None, 0))
 
     def run(self):
-        fmt = '{l_bar}{bar}[{elapsed}<{remaining}, {rate_fmt}{postfix} ]'
-        with tqdm(total=100, bar_format=fmt) as progress_bar:
-            previous_percent = 0
-            while not self.queue.empty():
-                url, predecessor, weight = self.queue.get()
-                logger.info(url)
-                logger.debug('%s %s %s' % (url, predecessor, weight))
-                if self.graph.check_node_exist(url):
-                    logger.debug('skip %s' % url)
+        try:
+            fmt = '{l_bar}{bar}[{elapsed}<{remaining}, {rate_fmt}{postfix} ]'
+            with tqdm(total=100, bar_format=fmt) as progress_bar:
+                previous_percent = 0
+                while not self.queue.empty():
+                    url, predecessor, weight = self.queue.get()
+                    logger.info(url)
+                    logger.debug('%s %s %s' % (url, predecessor, weight))
+                    if self.graph.check_node_exist(url):
+                        logger.debug('skip %s' % url)
 
-                actor_parser = ActorParser(url)
-                full_url = self.get_full_url(url)
-                soup = BeautifulSoup(request.urlopen(full_url), features="lxml")
-                page_type, infobox = parse_page_type_get_infobox(soup.html)
-                if page_type == PageType.ACTOR:
-                    self._process_actor(url, soup.html, infobox, predecessor,
-                                        weight)
-                elif page_type == PageType.MOVIE:
-                    self._process_movie(url, soup.html, infobox)
-                num_actors = self.graph.num_node(EntityType.ACTOR)
-                num_movies = self.graph.num_node(EntityType.MOVIE)
-                progress = '\033[92mactor: %d, movie: %d\033[0m' % (
-                    self.graph.num_node(EntityType.ACTOR),
-                    self.graph.num_node(EntityType.MOVIE))
-                percentage = ((min(num_actors,
-                                   self.actor_limit) / self.actor_limit
-                               + min(num_movies,
-                                     self.movie_limit) / self.movie_limit) / 2)
-                progress_bar.update((percentage - previous_percent) * 100)
-                previous_percent = percentage
-                progress_bar.set_postfix_str(progress)
-                if (0 < self.actor_limit < num_actors
-                        and 0 < self.movie_limit < num_movies):
-                    break
+                    actor_parser = ActorParser(url)
+                    full_url = self.get_full_url(url)
+                    soup = BeautifulSoup(request.urlopen(full_url),
+                                         features="lxml")
+                    page_type, infobox = parse_page_type_get_infobox(soup.html)
+                    if page_type == PageType.ACTOR:
+                        self._process_actor(url, soup.html, infobox,
+                                            predecessor,
+                                            weight)
+                    elif page_type == PageType.MOVIE:
+                        self._process_movie(url, soup.html, infobox)
+                    num_actors = self.graph.num_node(EntityType.ACTOR)
+                    num_movies = self.graph.num_node(EntityType.MOVIE)
+                    progress = '\033[92mactor: %d, movie: %d\033[0m' % (
+                        self.graph.num_node(EntityType.ACTOR),
+                        self.graph.num_node(EntityType.MOVIE))
+                    percentage = ((min(num_actors,
+                                       self.actor_limit) / self.actor_limit
+                                   + min(num_movies,
+                                         self.movie_limit) /
+                                   self.movie_limit) / 2)
+                    progress_bar.update((percentage - previous_percent) * 100)
+                    previous_percent = percentage
+                    progress_bar.set_postfix_str(progress)
+                    if (0 < self.actor_limit < num_actors
+                            and 0 < self.movie_limit < num_movies):
+                        break
+        except KeyboardInterrupt:
+            logger.info('Terminated due to keyboard interrupt')
 
-    def save(self, out_file: str) -> None:
-        json_str = self.graph.serialize()
-        with open(out_file, 'w') as f:
-            f.write(json_str)
+
+def save(self, out_file: str) -> None:
+    json_str = self.graph.serialize()
+    with open(out_file, 'w') as f:
+        f.write(json_str)
