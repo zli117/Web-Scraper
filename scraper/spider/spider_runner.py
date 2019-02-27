@@ -1,5 +1,5 @@
 from queue import LifoQueue, Queue
-from typing import Dict, cast
+from typing import Dict, Type, cast
 from urllib import parse, request
 
 from bs4 import BeautifulSoup
@@ -17,7 +17,7 @@ class SpiderRunner:
     _URL_PREFIX = 'https://en.wikipedia.org'
 
     def __init__(self, init_url: Url, actor_limit: int = -1,
-                 movie_limit: int = -1, queue: Queue = LifoQueue) -> None:
+                 movie_limit: int = -1, queue: Type[Queue] = LifoQueue) -> None:
         """
         Create a spider runner.
         Args:
@@ -61,8 +61,10 @@ class SpiderRunner:
         actor = self.actor_parser.parse_actor_object(url, infobox)
         if self.graph.add_node(actor):
             if predecessor:
-                self.graph.add_relationship(
-                    predecessor.node_id, actor.node_id).weight = weight
+                edge = self.graph.add_relationship(
+                    predecessor.node_id, actor.node_id)
+                if edge:
+                    edge.weight = weight
             movies = self.actor_parser.parse_related_movies(html)
             for movie in movies:
                 self.queue.put((movie, None, 0))

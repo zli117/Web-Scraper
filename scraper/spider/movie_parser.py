@@ -62,7 +62,7 @@ class MovieParser:
 
     @staticmethod
     def parse_cast(html: Tag) -> List[Url]:
-        urls = []
+        urls: List[Url] = []
         cast_h2 = html.find_all(
             lambda tag: tag.name == 'h2' and tag.find_all('span', id='Cast'))
         if len(cast_h2) != 1:
