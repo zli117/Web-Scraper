@@ -1,7 +1,7 @@
 import re
 from typing import Dict, List, Optional
 
-from bs4 import Tag
+from bs4.element import Tag
 
 from scraper.graph.actor import Actor
 from scraper.graph.base_objects import Url
@@ -10,7 +10,7 @@ from scraper.graph.base_objects import Url
 class ActorParser:
     @staticmethod
     def parse_actor_object(url: Url,
-                           infobox: Dict[str, Tag]) -> Optional[Actor]:
+                           infobox: Dict[str, Tag]) -> Actor:
         entity_name = url.split('/')[-1].replace('_', ' ')
         actor = Actor(name=entity_name, url=url)
 
@@ -22,12 +22,8 @@ class ActorParser:
             if extracted:
                 age_str = extracted.group(1)
                 print(age_str)
-                if age_str.isdigit():
-                    actor.age = int(age_str)
-                    return actor
-                else:
-                    # TODO: Logging here and return
-                    return None
+                actor.age = int(age_str)
+                return actor
 
         if 'Died' in infobox:
             extracted = age_pattern.match(
@@ -35,15 +31,11 @@ class ActorParser:
             if extracted:
                 age_str = extracted.group(1)
                 print(age_str)
-                if age_str.isdigit():
-                    actor.age = int(age_str)
-                    return actor
-                else:
-                    # TODO: Logging here and return
-                    return None
+                actor.age = int(age_str)
+                return actor
 
         # TODO: Logging here
-        return None
+        return actor
 
     @staticmethod
     def parse_related_movies(html: Tag) -> Optional[List[Url]]:
