@@ -11,13 +11,22 @@ from scraper.graph.graph import Graph
 from scraper.graph.shell import ShellRunner
 from scraper.spider.spider_runner import SpiderRunner
 
+COLORS = {
+    'WARNING': '\033[93m',
+    'DEBUG': '\033[94m',
+    'ERROR': '\033[91m'
+}
+
 
 class TqdmHandler(logging.StreamHandler):
     def __init__(self):
         logging.StreamHandler.__init__(self)
 
     def emit(self, record):
+        level = record.levelname
         msg = self.format(record)
+        if level in COLORS:
+            msg = '%s%s\033[0m' % (COLORS[level], msg)
         tqdm.write(msg)
 
 
