@@ -1,4 +1,5 @@
 import logging
+import os
 from queue import LifoQueue, Queue
 from typing import Dict, Type, cast
 from urllib import parse, request
@@ -113,8 +114,10 @@ class SpiderRunner:
         except KeyboardInterrupt:
             logger.info('Terminated due to keyboard interrupt')
 
-
-def save(self, out_file: str) -> None:
-    json_str = self.graph.serialize()
-    with open(out_file, 'w') as f:
-        f.write(json_str)
+    def save(self, out_file: str) -> None:
+        json_str = self.graph.serialize()
+        out_dir = os.path.dirname(out_file)
+        if os.path.isdir(out_dir) and not os.path.exists(out_dir):
+            os.mkdir(out_dir)
+        with open(out_file, 'w') as f:
+            f.write(json_str)

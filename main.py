@@ -1,6 +1,5 @@
 import argparse
 import logging
-import os
 import sys
 from typing import cast
 
@@ -63,13 +62,8 @@ if __name__ == '__main__':
         spider = SpiderRunner(cast(Url, '/wiki/Titanic_(1997_film)'),
                               actor_limit=args.actors, movie_limit=args.movies)
         spider.run()
+        spider.save(args.out)
         graph = spider.graph
-        if args.out is not None:
-            json_str = graph.serialize()
-            if not os.path.exists(os.path.dirname(args.out)):
-                os.mkdir(os.path.dirname(args.out))
-            with open(args.out, 'w') as f:
-                f.write(json_str)
 
     shell = ShellRunner(graph)
     shell.start()

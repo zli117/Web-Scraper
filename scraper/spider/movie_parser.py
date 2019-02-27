@@ -19,6 +19,7 @@ class MovieParser:
     """
     Parser for movie
     """
+
     def __init__(self, url: Url):
         self.url = url
 
@@ -47,8 +48,8 @@ class MovieParser:
             else:
                 logger.log(logging.WARN, 'Year not found for %s' % self.url)
         else:
-            currency = logger.log(logging.WARN,
-                                  'Release date not found for %s' % self.url)
+            logger.log(logging.WARN,
+                       'Release date not found for %s' % self.url)
 
         grossing_pattern = re.compile(
             '(\\$)([1-9][0-9]*(\\.[0-9]+)?) ((million)|(billion))')
@@ -125,6 +126,5 @@ class MovieParser:
                     urls.append(link.attrs['href'])
         else:
             logger.log(logging.WARN, 'No cast list for %s' % self.url)
-            pass
 
         return urls
